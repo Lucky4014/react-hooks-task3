@@ -1,0 +1,93 @@
+import { useState, useEffect } from "react";
+
+const USERS = [
+  { id: 1, name: "Aryan Sharma", role: "Frontend Developer", status: "active", score: 87, city: "Jaipur" },
+  { id: 2, name: "Priya Mehta", role: "UI Designer", status: "active", score: 92, city: "Mumbai" },
+  { id: 3, name: "Rohan Verma", role: "Backend Developer", status: "inactive", score: 74, city: "Delhi" },
+  { id: 4, name: "Sneha Patel", role: "Full Stack Dev", status: "active", score: 95, city: "Pune" },
+];
+
+function UserCard() {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [selectedId, setSelectedId] = useState(1);
+  const [views, setViews] = useState(0);
+
+  // useEffect #1 — selectedId change hone par user "fetch" karo
+  useEffect(() => {
+    setLoading(true);
+    setUser(null);
+    const timeout = setTimeout(() => {
+      const found = USERS.find((u) => u.id === selectedId);
+      setUser(found || null);
+      setLoading(false);
+    }, 600);
+    return () => clearTimeout(timeout); // cleanup
+  }, [selectedId]);
+
+  // useEffect #2 — naya user load hone par views badhao
+  useEffect(() => {
+    if (user) setViews((prev) => prev + 1);
+  }, [user]);
+
+  return (
+    <div className="card">
+      <h2 className="card-title">User State Data</h2>
+
+      <div className="user-select-row">
+        {USERS.map((u) => (
+          <button
+            key={u.id}
+            className={`user-btn ${selectedId === u.id ? "active" : ""}`}
+            onClick={() => setSelectedId(u.id)}
+          >
+            {u.name.split(" ")[0]}
+          </button>
+        ))}
+      </div>
+
+      <div className="user-panel">
+        {loading && (
+          <div className="loading">
+            <div className="spinner"></div>
+            <p>Loading user data...</p>
+          </div>
+        )}
+        {!loading && user && (
+          <div className="user-info">
+            <div className="avatar">{user.name.charAt(0)}</div>
+            <h3 className="user-name">{user.name}</h3>
+            <p className="user-role">{user.role}</p>
+            <p className="user-city">📍 {user.city}</p>
+            <div className="user-meta">
+              <div className="meta-item">
+                <span className="meta-label">Status</span>
+                <span className={`badge ${user.status === "active" ? "badge-green" : "badge-red"}`}>
+                  {user.status}
+                </span>
+              </div>
+              <div className="meta-item">
+                <span className="meta-label">Score</span>
+                <span className="meta-value">{user.score}/100</span>
+              </div>
+              <div className="meta-item">
+                <span className="meta-label">Views</span>
+                <span className="meta-value">{views}</span>
+              </div>
+            </div>
+            <div className="score-bar">
+              <div className="score-fill" style={{ width: `${user.score}%` }}></div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="hook-info">
+        <div className="hook-chip">useState × 4</div>
+        <div className="hook-chip">useEffect × 2</div>
+      </div>
+    </div>
+  );
+}
+
+export default UserCard;
